@@ -9,29 +9,29 @@ app.use(express.static('public'));
 
 app.get('/api/audit', async (req, res) => {
     const { ref } = req.query;
-    console.log("Inquiry for Subject:", ref);
+    console.log("Fetching details for:", ref);
 
     try {
         const url1 = `${process.env.API_URL_1}${ref}`;
         const url2 = `${process.env.API_URL_2}${ref}`;
 
+        // Dono APIs ko parallel call karna
         const [res1, res2] = await Promise.all([
             axios.get(url1).catch(() => ({ data: {} })),
             axios.get(url2).catch(() => ({ data: {} }))
         ]);
 
-        // Exact mapping as per your requirement
-        const finalReport = {
+        // Exact Field Extraction
+        const responseData = {
             owner: res2.data?.owner_name || "NOT FOUND",
-            mobile: res1.data?.Mobile_no || res1.data?.mobile_no || "UNAVAILABLE",
-            address: res2.data?.permanent_address || "ADDRESS NOT FOUND"
+            address: res2.data?.permanent_address || "NOT FOUND",
+            mobile: res1.data?.mobile_no || res1.data?.Mobile_no || "UNAVAILABLE"
         };
 
-        console.log("Data Payload Ready.");
-        res.json(finalReport);
+        res.json(responseData);
     } catch (error) {
-        res.status(500).json({ error: "GATEWAY ERROR" });
+        res.status(500).json({ error: "API_TIMEOUT" });
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));
