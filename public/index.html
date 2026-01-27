@@ -7,13 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #ffffff; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0; font-family: sans-serif; }
-        /* Ultra-light color for stealth, but allows editing */
         #mainInput {
             border: none;
             outline: none;
             text-align: center;
             font-size: 1.5rem;
-            color: #f1f5f9; /* Super light gray */
+            color: #f1f5f9;
             letter-spacing: 5px;
             font-weight: 900;
             text-transform: uppercase;
@@ -21,6 +20,26 @@
             background: transparent;
             caret-color: #cbd5e1;
         }
+        /* Fetching Loader Style */
+        #loader {
+            display: none;
+            position: fixed;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .dot-pulse {
+            width: 10px;
+            height: 10px;
+            background-color: #f1f5f9;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.5; }
+            50% { transform: scale(1.5); opacity: 1; }
+        }
+
         #overlay { position: fixed; inset: 0; background: #fff; z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
         .data-card { background: #fff; border: 1px solid #f8fafc; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); }
     </style>
@@ -29,11 +48,16 @@
 
     <input type="text" id="mainInput" autocomplete="off" autofocus>
 
+    <div id="loader">
+        <div class="dot-pulse"></div>
+        <p style="color: #f1f5f9; font-size: 10px; font-weight: bold; letter-spacing: 3px;">FETCHING DATA...</p>
+    </div>
+
     <div id="overlay">
         <div onclick="copyCleanData()" class="data-card active:scale-95 transition-transform cursor-pointer">
             <div class="flex items-center gap-2 mb-6 border-b pb-4">
                 <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Decoded_Record</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Authenticated_Data</span>
             </div>
             
             <div class="space-y-6">
@@ -56,14 +80,18 @@
 
     <script>
         const input = document.getElementById('mainInput');
+        const loader = document.getElementById('loader');
         const overlay = document.getElementById('overlay');
 
         input.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
                 const val = input.value.trim().toUpperCase();
                 if (val.length < 4) return;
-                input.style.opacity = "0.1";
-                
+
+                // Hide input and show loader
+                input.style.display = 'none';
+                loader.style.display = 'flex';
+
                 try {
                     const res = await fetch(`/api/audit?ref=${val}`);
                     const data = await res.json();
@@ -71,8 +99,13 @@
                     document.getElementById('owner').innerText = data.owner;
                     document.getElementById('mobile').innerText = data.mobile;
                     document.getElementById('address').innerText = data.address;
+                    
+                    // Hide loader and show result
+                    loader.style.display = 'none';
                     overlay.style.display = 'flex';
-                } catch (err) { location.reload(); }
+                } catch (err) {
+                    location.reload(); 
+                }
             }
         });
 
@@ -81,11 +114,11 @@
             const m = document.getElementById('mobile').innerText;
             const a = document.getElementById('address').innerText;
             
-            // Format: Only clean data, no labels
+            // Format: Clean lines only
             const cleanText = `${o}\n${m}\n${a}`;
             
             navigator.clipboard.writeText(cleanText).then(() => {
-                alert("Data Copied");
+                alert("Data Secured");
                 location.reload();
             });
         }
