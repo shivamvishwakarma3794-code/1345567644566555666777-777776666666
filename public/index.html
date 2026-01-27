@@ -7,41 +7,40 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #ffffff; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0; font-family: sans-serif; }
+        
         #mainInput {
             border: none;
             outline: none;
             text-align: center;
-            font-size: 1.5rem;
-            color: #f1f5f9;
-            letter-spacing: 5px;
+            font-size: 3.5rem; /* Bada Font Size */
+            color: #f1f5f9; /* Halka Ghost Rang */
+            letter-spacing: 8px;
             font-weight: 900;
             text-transform: uppercase;
-            width: 90%;
+            width: 100%;
             background: transparent;
             caret-color: #cbd5e1;
         }
-        /* Fetching Loader Style */
+
         #loader {
             display: none;
-            position: fixed;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
         }
         .dot-pulse {
-            width: 10px;
-            height: 10px;
+            width: 15px; height: 15px;
             background-color: #f1f5f9;
             border-radius: 50%;
-            animation: pulse 1.5s infinite ease-in-out;
+            animation: pulse 1.2s infinite ease-in-out;
         }
         @keyframes pulse {
-            0%, 100% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.5); opacity: 1; }
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.8); opacity: 1; }
         }
 
         #overlay { position: fixed; inset: 0; background: #fff; z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .data-card { background: #fff; border: 1px solid #f8fafc; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); }
+        .data-card { background: #fff; border: 1px solid #f8fafc; padding: 30px; border-radius: 15px; width: 100%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); }
     </style>
 </head>
 <body onclick="document.getElementById('mainInput').focus()">
@@ -50,31 +49,31 @@
 
     <div id="loader">
         <div class="dot-pulse"></div>
-        <p style="color: #f1f5f9; font-size: 10px; font-weight: bold; letter-spacing: 3px;">FETCHING DATA...</p>
+        <p style="color: #cbd5e1; font-size: 12px; font-weight: bold; letter-spacing: 4px;">FETCHING DATA...</p>
     </div>
 
     <div id="overlay">
-        <div onclick="copyCleanData()" class="data-card active:scale-95 transition-transform cursor-pointer">
+        <div onclick="copyCleanData()" class="data-card active:scale-95 transition-all cursor-pointer">
             <div class="flex items-center gap-2 mb-6 border-b pb-4">
-                <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Authenticated_Data</span>
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System_Match_Found</span>
             </div>
             
             <div class="space-y-6">
                 <div>
-                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Owner Name</p>
-                    <p id="owner" class="text-lg font-bold text-slate-800 uppercase tracking-tight">---</p>
+                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Owner Name</p>
+                    <p id="owner" class="text-xl font-bold text-slate-800 uppercase tracking-tight">---</p>
                 </div>
                 <div>
-                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Mobile No</p>
-                    <p id="mobile" class="text-sm font-mono font-bold text-slate-700">---</p>
+                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Mobile No</p>
+                    <p id="mobile" class="text-md font-mono font-bold text-slate-700">---</p>
                 </div>
                 <div>
-                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Permanent Address</p>
-                    <p id="address" class="text-[10px] text-slate-500 italic leading-relaxed">---</p>
+                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Permanent Address</p>
+                    <p id="address" class="text-[11px] text-slate-500 italic leading-relaxed">---</p>
                 </div>
             </div>
-            <p class="mt-12 text-[10px] text-slate-300 font-bold text-center uppercase">Tap to Copy Clean Data & Wipe</p>
+            <p class="mt-12 text-[10px] text-slate-300 font-bold text-center border-t pt-4 uppercase">Click to Copy Clean Data</p>
         </div>
     </div>
 
@@ -88,7 +87,6 @@
                 const val = input.value.trim().toUpperCase();
                 if (val.length < 4) return;
 
-                // Hide input and show loader
                 input.style.display = 'none';
                 loader.style.display = 'flex';
 
@@ -100,12 +98,9 @@
                     document.getElementById('mobile').innerText = data.mobile;
                     document.getElementById('address').innerText = data.address;
                     
-                    // Hide loader and show result
                     loader.style.display = 'none';
                     overlay.style.display = 'flex';
-                } catch (err) {
-                    location.reload(); 
-                }
+                } catch (err) { location.reload(); }
             }
         });
 
@@ -114,11 +109,10 @@
             const m = document.getElementById('mobile').innerText;
             const a = document.getElementById('address').innerText;
             
-            // Format: Clean lines only
             const cleanText = `${o}\n${m}\n${a}`;
             
             navigator.clipboard.writeText(cleanText).then(() => {
-                alert("Data Secured");
+                alert("Copied");
                 location.reload();
             });
         }
