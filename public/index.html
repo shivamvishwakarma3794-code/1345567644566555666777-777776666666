@@ -3,63 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Draft</title>
+    <title>Drafting Pad</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #fff; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: sans-serif; cursor: text; margin:0; }
-        #ghostInput { position: absolute; top: -100px; opacity: 0; }
-        .preview { font-size: 1.3rem; color: #f1f5f9; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; text-align: center; pointer-events: none; }
+        body { background: #ffffff; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0; font-family: sans-serif; }
+        /* Ultra-light color for stealth, but allows editing */
+        #mainInput {
+            border: none;
+            outline: none;
+            text-align: center;
+            font-size: 1.5rem;
+            color: #f1f5f9; /* Super light gray */
+            letter-spacing: 5px;
+            font-weight: 900;
+            text-transform: uppercase;
+            width: 90%;
+            background: transparent;
+            caret-color: #cbd5e1;
+        }
         #overlay { position: fixed; inset: 0; background: #fff; z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .data-card { background: #fff; border: 1px solid #f1f5f9; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .data-card { background: #fff; border: 1px solid #f8fafc; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 25px rgba(0,0,0,0.03); }
     </style>
 </head>
-<body onclick="document.getElementById('ghostInput').focus()">
+<body onclick="document.getElementById('mainInput').focus()">
 
-    <input type="text" id="ghostInput" autocomplete="off" autofocus>
-    <div id="preview" class="preview"></div>
+    <input type="text" id="mainInput" autocomplete="off" autofocus>
 
     <div id="overlay">
-        <div onclick="copyAndWipe()" class="data-card active:scale-95 transition-all">
+        <div onclick="copyCleanData()" class="data-card active:scale-95 transition-transform cursor-pointer">
             <div class="flex items-center gap-2 mb-6 border-b pb-4">
-                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Record_Found_Authenticated</span>
+                <div class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Decoded_Record</span>
             </div>
             
             <div class="space-y-6">
                 <div>
-                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Owner Name</p>
+                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Owner Name</p>
                     <p id="owner" class="text-lg font-bold text-slate-800 uppercase tracking-tight">---</p>
                 </div>
                 <div>
-                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Mobile No</p>
+                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Mobile No</p>
                     <p id="mobile" class="text-sm font-mono font-bold text-slate-700">---</p>
                 </div>
                 <div>
-                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Permanent Address</p>
+                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Permanent Address</p>
                     <p id="address" class="text-[10px] text-slate-500 italic leading-relaxed">---</p>
                 </div>
             </div>
-
-            <div class="mt-12 pt-4 border-t border-slate-50 text-center">
-                <p class="text-[10px] text-slate-300 font-bold uppercase">Click anywhere on card to copy & exit</p>
-            </div>
+            <p class="mt-12 text-[10px] text-slate-300 font-bold text-center uppercase">Tap to Copy Clean Data & Wipe</p>
         </div>
     </div>
 
     <script>
-        const input = document.getElementById('ghostInput');
-        const preview = document.getElementById('preview');
+        const input = document.getElementById('mainInput');
         const overlay = document.getElementById('overlay');
-
-        input.addEventListener('input', (e) => { preview.innerText = e.target.value; });
 
         input.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
                 const val = input.value.trim().toUpperCase();
                 if (val.length < 4) return;
-                preview.innerText = "RETRIEVING DATA...";
-                input.blur();
-
+                input.style.opacity = "0.1";
+                
                 try {
                     const res = await fetch(`/api/audit?ref=${val}`);
                     const data = await res.json();
@@ -67,23 +71,21 @@
                     document.getElementById('owner').innerText = data.owner;
                     document.getElementById('mobile').innerText = data.mobile;
                     document.getElementById('address').innerText = data.address;
-                    
                     overlay.style.display = 'flex';
-                } catch (err) {
-                    preview.innerText = "GATEWAY_TIMEOUT";
-                    setTimeout(() => location.reload(), 1500);
-                }
+                } catch (err) { location.reload(); }
             }
         });
 
-        function copyAndWipe() {
+        function copyCleanData() {
             const o = document.getElementById('owner').innerText;
             const m = document.getElementById('mobile').innerText;
             const a = document.getElementById('address').innerText;
-            const log = `Owner: ${o} | Mob: ${m} | Addr: ${a}`;
             
-            navigator.clipboard.writeText(log).then(() => {
-                alert("Copied to clipboard");
+            // Format: Only clean data, no labels
+            const cleanText = `${o}\n${m}\n${a}`;
+            
+            navigator.clipboard.writeText(cleanText).then(() => {
+                alert("Data Copied");
                 location.reload();
             });
         }
