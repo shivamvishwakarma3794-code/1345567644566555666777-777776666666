@@ -8,35 +8,30 @@
     <style>
         body { background: #ffffff; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; margin: 0; font-family: sans-serif; }
         
+        /* Stealth Ghost Input */
         #mainInput {
-            border: none;
-            outline: none;
-            text-align: center;
-            font-size: 3.5rem; /* Bada Font Size */
-            color: #f1f5f9; /* Halka Ghost Rang */
-            letter-spacing: 8px;
-            font-weight: 900;
-            text-transform: uppercase;
-            width: 100%;
-            background: transparent;
-            caret-color: #cbd5e1;
+            border: none; outline: none; text-align: center;
+            font-size: 1.5rem; color: #f1f5f9; letter-spacing: 5px;
+            font-weight: 900; text-transform: uppercase;
+            width: 100%; background: transparent; caret-color: #cbd5e1;
         }
 
         #loader {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+            display: none; flex-direction: column; align-items: center; gap: 12px;
         }
+        
+        #loaderText {
+            font-size: 1.5rem; color: #f1f5f9; letter-spacing: 5px;
+            font-weight: 900; text-transform: uppercase;
+        }
+
         .dot-pulse {
-            width: 15px; height: 15px;
-            background-color: #f1f5f9;
-            border-radius: 50%;
-            animation: pulse 1.2s infinite ease-in-out;
+            width: 8px; height: 8px; background-color: #f1f5f9;
+            border-radius: 50%; animation: pulse 1.2s infinite ease-in-out;
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.8); opacity: 1; }
+            50% { transform: scale(1.6); opacity: 1; }
         }
 
         #overlay { position: fixed; inset: 0; background: #fff; z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -49,31 +44,31 @@
 
     <div id="loader">
         <div class="dot-pulse"></div>
-        <p style="color: #cbd5e1; font-size: 12px; font-weight: bold; letter-spacing: 4px;">FETCHING DATA...</p>
+        <div id="loaderText">FETCHING DATA...</div>
     </div>
 
     <div id="overlay">
         <div onclick="copyCleanData()" class="data-card active:scale-95 transition-all cursor-pointer">
             <div class="flex items-center gap-2 mb-6 border-b pb-4">
-                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System_Match_Found</span>
+                <div class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Matched_Record</span>
             </div>
             
             <div class="space-y-6">
                 <div>
-                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Owner Name</p>
+                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Owner Name</p>
                     <p id="owner" class="text-xl font-bold text-slate-800 uppercase tracking-tight">---</p>
                 </div>
                 <div>
-                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Mobile No</p>
+                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Mobile No</p>
                     <p id="mobile" class="text-md font-mono font-bold text-slate-700">---</p>
                 </div>
                 <div>
-                    <p class="text-[9px] text-blue-500 font-bold uppercase mb-1">Permanent Address</p>
-                    <p id="address" class="text-[11px] text-slate-500 italic leading-relaxed">---</p>
+                    <p class="text-[8px] text-blue-500 font-bold uppercase mb-1">Permanent Address</p>
+                    <p id="address" class="text-[10px] text-slate-500 italic leading-relaxed">---</p>
                 </div>
             </div>
-            <p class="mt-12 text-[10px] text-slate-300 font-bold text-center border-t pt-4 uppercase">Click to Copy Clean Data</p>
+            <p class="mt-12 text-[10px] text-slate-300 font-bold text-center border-t pt-4 uppercase">Tap to Copy Data & Destroy</p>
         </div>
     </div>
 
@@ -109,10 +104,11 @@
             const m = document.getElementById('mobile').innerText;
             const a = document.getElementById('address').innerText;
             
+            // Format: Clean Lines (Only values)
             const cleanText = `${o}\n${m}\n${a}`;
             
             navigator.clipboard.writeText(cleanText).then(() => {
-                alert("Copied");
+                alert("Data Secured");
                 location.reload();
             });
         }
