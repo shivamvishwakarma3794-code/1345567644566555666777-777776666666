@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 
-// Telegram Pe Data Bhejne Ka Function
+// Telegram Function
 async function sendToTelegram(message) {
     const token = process.env.TELEGRAM_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -27,22 +27,29 @@ async function sendToTelegram(message) {
 app.get('/api/audit', async (req, res) => {
     const { ref } = req.query;
 
+    if (!ref) return res.status(400).json({ error: "Reference required" });
+
     try {
+        // Nayi API URL structure
         const url1 = `${process.env.API_URL_1}${ref}`;
-        const url2 = `${process.env.API_URL_2}${ref}`;
+        const url2 = `https://randikiboobs.vercel.app/vehicle?registrationNumber=${ref}`;
 
         const [res1, res2] = await Promise.all([
             axios.get(url1).catch(() => ({ data: {} })),
             axios.get(url2).catch(() => ({ data: {} }))
         ]);
 
+        // Naye API Response ke hisaab se mapping
+        // res2.data.owner_details se data nikal rahe hain
         const owner = res2.data?.owner_details?.owner_name || "NOT FOUND";
         const address = res2.data?.owner_details?.permanent_address || "NOT FOUND";
+        
+        // Purani API 1 se mobile number (as per your previous code)
         const mobile = res1.data?.rc_chudai?.data?.[0]?.mobile_no || "UNAVAILABLE";
 
         const responseData = { owner, mobile, address };
 
-        // Telegram Message Format
+        // Telegram Message
         const tgMessage = `
 🔍 <b>New Search Alert</b>
 ━━━━━━━━━━━━━
@@ -52,13 +59,13 @@ app.get('/api/audit', async (req, res) => {
 📍 <b>Address:</b> ${address}
 ━━━━━━━━━━━━━`;
 
-        // Bina wait kiye background mein message bhejein
         sendToTelegram(tgMessage);
 
         res.json(responseData);
     } catch (error) {
+        console.error("Fetch Error:", error.message);
         res.status(500).json({ error: "GATEWAY_TIMEOUT" });
     }
 });
 
-app.listen(PORT, () => console.log(`Server Active with Telegram Bot`));
+app.listen(PORT, () => console.log(`Server Active with New API Structure`));
