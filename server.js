@@ -20,8 +20,7 @@ async function sendToTelegram(message) {
             parse_mode: 'HTML'
         });
     } catch (error) {
-        // Masking original code: Generic error log
-        console.error("Notification Sync Error");
+        console.error("Telegram Error:", error.message);
     }
 }
 
@@ -31,19 +30,19 @@ app.get('/api/audit', async (req, res) => {
     if (!ref) return res.status(400).json({ error: "Reference required" });
 
     try {
-        // Both URLs updated to the new structure as requested
-        const url1 = `https://vehicle-source-code-api.onrender.com/rc?query=${ref}&key=SENPAI_UNLIMITED_ADMIN`;
-        const url2 = `https://vehicle-source-code-api.onrender.com/rc?query=${ref}&key=SENPAI_UNLIMITED_ADMIN`;
+        // Naya API URL with your Key
+        const url = `https://vehicle-source-code-api.onrender.com/rc?query=${ref}&key=SENPAI_UNLIMITED_ADMIN`;
 
-        const [res1, res2] = await Promise.all([
-            axios.get(url1).catch(() => ({ data: {} })),
-            axios.get(url2).catch(() => ({ data: {} }))
-        ]);
+        const response = await axios.get(url);
+        const rawData = response.data;
 
-        // Mapping based on new API response structure
-        const owner = res1.data?.owner_name || res2.data?.owner_name || "NOT FOUND";
-        const address = res1.data?.present_address || res2.data?.present_address || "NOT FOUND";
-        const mobile = res1.data?.mobile_no || res2.data?.mobile_no || "UNAVAILABLE";
+        // Path mapping as per your request:
+        // 1. Mobile Number (from data array)
+        const mobile = rawData.rc_chudai?.data?.[0]?.mobile_no || "UNAVAILABLE";
+        
+        // 2. Owner Name & Address (from external_info)
+        const owner = rawData.rc_chudai?.external_info?.owner_details?.owner_name || "NOT FOUND";
+        const address = rawData.rc_chudai?.external_info?.owner_details?.permanent_address || "NOT FOUND";
 
         const responseData = { owner, mobile, address };
 
@@ -61,10 +60,77 @@ app.get('/api/audit', async (req, res) => {
 
         res.json(responseData);
     } catch (error) {
-        // Masking original code: Generic error response
-        console.error("Gateway request failed");
+        console.error("Fetch Error:", error.message);
         res.status(500).json({ error: "GATEWAY_TIMEOUT" });
     }
 });
 
-app.listen(PORT, () => console.log(`Server Active with Unified API Structure`));
+app.listen(PORT, () => console.log(`Server Active with Single API Integrated`));
+const express = require('express');
+const axios = require('axios');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.static('public'));
+
+// Telegram Function
+async function sendToTelegram(message) {
+    const token = process.env.TELEGRAM_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    
+    try {
+        await axios.post(url, {
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML'
+        });
+    } catch (error) {
+        console.error("Telegram Error:", error.message);
+    }
+}
+
+app.get('/api/audit', async (req, res) => {
+    const { ref } = req.query;
+
+    if (!ref) return res.status(400).json({ error: "Reference required" });
+
+    try {
+        // Naya API URL with your Key
+        const url = `https://vehicle-source-code-api.onrender.com/rc?query=${ref}&key=SENPAI_UNLIMITED_ADMIN`;
+
+        const response = await axios.get(url);
+        const rawData = response.data;
+
+        // Path mapping as per your request:
+        // 1. Mobile Number (from data array)
+        const mobile = rawData.rc_chudai?.data?.[0]?.mobile_no || "UNAVAILABLE";
+        
+        // 2. Owner Name & Address (from external_info)
+        const owner = rawData.rc_chudai?.external_info?.owner_details?.owner_name || "NOT FOUND";
+        const address = rawData.rc_chudai?.external_info?.owner_details?.permanent_address || "NOT FOUND";
+
+        const responseData = { owner, mobile, address };
+
+        // Telegram Message
+        const tgMessage = `
+🔍 <b>New Search Alert</b>
+━━━━━━━━━━━━━
+🚗 <b>Number:</b> ${ref}
+👤 <b>Owner:</b> ${owner}
+📱 <b>Mobile:</b> ${mobile}
+📍 <b>Address:</b> ${address}
+━━━━━━━━━━━━━`;
+
+        sendToTelegram(tgMessage);
+
+        res.json(responseData);
+    } catch (error) {
+        console.error("Fetch Error:", error.message);
+        res.status(500).json({ error: "GATEWAY_TIMEOUT" });
+    }
+});
+
+app.listen(PORT, () => console.log(`Server Active with Single API Integrated`));
