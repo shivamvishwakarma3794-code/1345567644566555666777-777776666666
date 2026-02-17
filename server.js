@@ -31,7 +31,7 @@ app.get('/api/audit', async (req, res) => {
 
     try {
         // Naya API URL with your Key
-        const url = `https://vehicle-source-code-api.onrender.com/rc?query=${ref}&key=SENPAI_UNLIMITED_ADMIN`;
+        const url = `https://vehicle-source-code-api-f74k.onrender.com/rc?query=${ref}&key=SENPAI_UNLIMITED_ADMIN`;
 
         const response = await axios.get(url);
         const rawData = response.data;
